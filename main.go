@@ -12,8 +12,8 @@ import (
 type webhookReqBody struct {
 	UpdateID int `json:"update_id"`
 	Message  struct {
-		Photo PhotoSize `json:"photo"`
-		Text  string    `json:"text"`
+		Photo []PhotoSize `json:"photo"`
+		Text  string      `json:"text"`
 		Chat  struct {
 			ID int64 `json:"id"`
 		} `json:"chat"`
