@@ -10,9 +10,11 @@ import (
 )
 
 type webhookReqBody struct {
-	Message struct {
-		Text string `json:"text"`
-		Chat struct {
+	UpdateId int `json:"update_id"`
+	Message  struct {
+		Photo string `json:"photo"`
+		Text  string `json:"text"`
+		Chat  struct {
 			ID int64 `json:"id"`
 		} `json:"chat"`
 	} `json:"message"`
