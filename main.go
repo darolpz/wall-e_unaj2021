@@ -10,10 +10,10 @@ import (
 )
 
 type webhookReqBody struct {
-	UpdateId int `json:"update_id"`
+	UpdateID int `json:"update_id"`
 	Message  struct {
-		Photo string `json:"photo"`
-		Text  string `json:"text"`
+		Photo PhotoSize `json:"photo"`
+		Text  string    `json:"text"`
 		Chat  struct {
 			ID int64 `json:"id"`
 		} `json:"chat"`
@@ -23,6 +23,14 @@ type webhookReqBody struct {
 type sendMessageReqBody struct {
 	ChatID int64  `json:"chat_id"`
 	Text   string `json:"text"`
+}
+
+type PhotoSize struct {
+	FileID       string `json:"file_id"`
+	FileUniqueID string `json:"file_unique_id"`
+	Width        int    `json:"width"`
+	Height       int    `json:"height"`
+	FileSize     int    `json:"file_size"`
 }
 
 // This handler is called everytime telegram sends us a webhook event
