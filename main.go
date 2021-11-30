@@ -45,8 +45,11 @@ func Handler(res http.ResponseWriter, req *http.Request) {
 
 // Server listen to port 3000
 func main() {
-	fmt.Printf("Listen to port 3000\n")
-	http.ListenAndServe(":3000", http.HandlerFunc(Handler))
+
+	port := os.Getenv("PORT")
+
+	fmt.Printf("Listen to port %s\n", port)
+	http.ListenAndServe(fmt.Sprintf(":%s", port), http.HandlerFunc(Handler))
 }
 
 func makeRequest(chatID int64, telegramToken string) error {
