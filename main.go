@@ -7,6 +7,8 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+
+	"github.com/joho/godotenv"
 )
 
 type webhookReqBody struct {
@@ -33,6 +35,7 @@ func Handler(res http.ResponseWriter, req *http.Request) {
 		fmt.Printf("could not decode request body: %s\n", err)
 		return
 	}
+	fmt.Printf("reqBody: %+v", reqBody)
 
 	if err := makeRequest(reqBody.Message.Chat.ID, token); err != nil {
 		fmt.Printf("could send response: %s\n", err)
@@ -45,7 +48,10 @@ func Handler(res http.ResponseWriter, req *http.Request) {
 
 // Server listen to port 3000
 func main() {
-
+	err := godotenv.Load(".env")
+	if err != nil {
+		panic(err)
+	}
 	port := os.Getenv("PORT")
 
 	fmt.Printf("Listen to port %s\n", port)
@@ -64,8 +70,9 @@ func makeRequest(chatID int64, telegramToken string) error {
 		return err
 	}
 
+	url := fmt.Sprintf("https://api.telegram.org/bot%s/sendMessage", telegramToken)
 	// Send a post request with your token
-	res, err := http.Post(fmt.Sprintf("https://api.telegram.org/%s/sendMessage", telegramToken), "application/json", bytes.NewBuffer(resBytes))
+	res, err := http.Post(url, "application/json", bytes.NewBuffer(resBytes))
 	if err != nil {
 		return err
 	}
