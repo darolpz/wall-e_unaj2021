@@ -7,8 +7,6 @@ import (
 	"fmt"
 	"net/http"
 	"os"
-
-	"github.com/joho/godotenv"
 )
 
 type webhookReqBody struct {
@@ -48,10 +46,11 @@ func Handler(res http.ResponseWriter, req *http.Request) {
 
 // Server listen to port 3000
 func main() {
-	err := godotenv.Load(".env")
+	// Just for debugging
+	/* err := godotenv.Load(".env")
 	if err != nil {
 		panic(err)
-	}
+	} */
 	port := os.Getenv("PORT")
 
 	fmt.Printf("Listen to port %s\n", port)
