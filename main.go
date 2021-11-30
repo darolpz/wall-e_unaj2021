@@ -9,15 +9,23 @@ import (
 	"os"
 )
 
+const (
+	sendMessage = "https://api.telegram.org/bot%s/sendMessage"
+	getFile     = "https://api.telegram.org/bot%s/getFile?file_id=%s"
+	file        = "https://api.telegram.org/file/bot%s/%s"
+)
+
 type webhookReqBody struct {
-	UpdateID int `json:"update_id"`
-	Message  struct {
-		Photo []PhotoSize `json:"photo"`
-		Text  string      `json:"text"`
-		Chat  struct {
-			ID int64 `json:"id"`
-		} `json:"chat"`
-	} `json:"message"`
+	UpdateID int     `json:"update_id"`
+	Message  Message `json:"message"`
+}
+
+type Message struct {
+	Photo []PhotoSize `json:"photo"`
+	Text  string      `json:"text"`
+	Chat  struct {
+		ID int64 `json:"id"`
+	} `json:"chat"`
 }
 
 type sendMessageReqBody struct {
@@ -33,6 +41,11 @@ type PhotoSize struct {
 	FileSize     int    `json:"file_size"`
 }
 
+type File struct {
+	FileID   string `json:"file_id"`
+	FilePath string `json:"file_path"`
+}
+
 // This handler is called everytime telegram sends us a webhook event
 func Handler(res http.ResponseWriter, req *http.Request) {
 	token := os.Getenv("TELEGRAM_BOT_TOKEN")
@@ -45,7 +58,7 @@ func Handler(res http.ResponseWriter, req *http.Request) {
 	}
 	fmt.Printf("reqBody: %+v", reqBody)
 
-	if err := makeRequest(reqBody.Message.Chat.ID, token); err != nil {
+	if err := makeRequest(reqBody.Message, token); err != nil {
 		fmt.Printf("could send response: %s\n", err)
 		return
 	}
@@ -67,9 +80,9 @@ func main() {
 	http.ListenAndServe(fmt.Sprintf(":%s", port), http.HandlerFunc(Handler))
 }
 
-func makeRequest(chatID int64, telegramToken string) error {
+func makeRequest(message Message, telegramToken string) error {
 	resBody := sendMessageReqBody{
-		ChatID: chatID,
+		ChatID: message.Chat.ID,
 		Text:   "HI!",
 	}
 
@@ -79,16 +92,28 @@ func makeRequest(chatID int64, telegramToken string) error {
 		return err
 	}
 
-	url := fmt.Sprintf("https://api.telegram.org/bot%s/sendMessage", telegramToken)
+	getFileRes, err := http.Get(fmt.Sprintf(getFile, telegramToken, message.Photo[0].FileID))
+	if err != nil {
+		fmt.Printf("getfile response error: %s\n", err)
+		return err
+	}
+	defer getFileRes.Body.Close()
+	file := &File{}
+	if err := json.NewDecoder(getFileRes.Body).Decode(file); err != nil {
+		fmt.Printf("could not decode file: %s\n", err)
+		return err
+	}
+	fmt.Printf("File: %+v\n", getFileRes)
+
 	// Send a post request with your token
-	res, err := http.Post(url, "application/json", bytes.NewBuffer(resBytes))
+	sendMessageRes, err := http.Post(fmt.Sprintf(sendMessage, telegramToken), "application/json", bytes.NewBuffer(resBytes))
 	if err != nil {
 		return err
 	}
-	defer res.Body.Close()
+	defer sendMessageRes.Body.Close()
 
-	if res.StatusCode != http.StatusOK {
-		return errors.New("unexpected status " + res.Status)
+	if sendMessageRes.StatusCode != http.StatusOK {
+		return errors.New("unexpected status " + sendMessageRes.Status)
 	}
 
 	return nil
