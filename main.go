@@ -103,7 +103,7 @@ func makeRequest(message Message, telegramToken string) error {
 		fmt.Printf("could not decode file: %s\n", err)
 		return err
 	}
-	fmt.Printf("File: %+v\n", getFileRes)
+	fmt.Printf("File: %+v\n", file)
 
 	// Send a post request with your token
 	sendMessageRes, err := http.Post(fmt.Sprintf(sendMessage, telegramToken), "application/json", bytes.NewBuffer(resBytes))
