@@ -72,7 +72,8 @@ func Handler(res http.ResponseWriter, req *http.Request) {
 	}
 	fmt.Printf("reqBody: %+v", reqBody)
 
-	image, err := getFile(reqBody.Message.Photo[0].FileID, telegramToken)
+	lastPhoto := reqBody.Message.Photo[len(reqBody.Message.Photo)-1]
+	image, err := getFile(lastPhoto.FileID, telegramToken)
 	if err != nil {
 		fmt.Printf("could not get image: %s\n", err)
 		res.WriteHeader(http.StatusInternalServerError)
