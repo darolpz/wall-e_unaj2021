@@ -59,6 +59,18 @@ type AWSResponse struct {
 	Probability string `json:"probability"`
 }
 
+var classesDictionary = map[string]string{
+	"cardboard": "carton",
+	"glass":     "vidrio",
+	"metal":     "metal",
+	"organic":   "organico",
+	"paper":     "papel",
+	"plastic":   "plastico",
+	"trash":     "otros",
+}
+
+// ['cardboard', 'glass', 'metal', 'organic', 'paper', 'plastic', 'trash']
+
 // This handler is called everytime telegram sends us a webhook event
 func Handler(res http.ResponseWriter, req *http.Request) {
 	telegramToken := os.Getenv("TELEGRAM_BOT_TOKEN")
@@ -70,7 +82,7 @@ func Handler(res http.ResponseWriter, req *http.Request) {
 		res.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	fmt.Printf("reqBody: %+v", reqBody)
+	fmt.Printf("reqBody: %+v\n", reqBody)
 
 	lastPhoto := reqBody.Message.Photo[len(reqBody.Message.Photo)-1]
 	image, err := getFile(lastPhoto.FileID, telegramToken)
@@ -111,9 +123,14 @@ func main() {
 }
 
 func makeRequest(chatID int64, telegramToken string, awsResponse AWSResponse) error {
+	spanishClass, ok := classesDictionary[awsResponse.Class]
+	if !ok {
+		return errors.New("unknown class")
+	}
+
 	resBody := sendMessageReqBody{
 		ChatID: chatID,
-		Text:   fmt.Sprintf("Hay un %s de probabilidad que su residuo sea de tipo %s", awsResponse.Probability, awsResponse.Class),
+		Text:   fmt.Sprintf("Hay un %s de probabilidad que su residuo sea de tipo: %s", awsResponse.Probability, spanishClass),
 	}
 
 	// Create the JSON body from the struct
@@ -198,6 +215,6 @@ func classify(imageByte []byte) (AWSResponse, error) {
 		return AWSResponse{}, err
 	}
 
-	fmt.Printf("awsResponse: %v", awsResponse)
+	fmt.Printf("awsResponse: %v\n", awsResponse)
 	return *awsResponse, nil
 }
