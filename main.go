@@ -89,11 +89,6 @@ func Handler(res http.ResponseWriter, req *http.Request) {
 	}
 	fmt.Printf("reqBody: %+v\n", reqBody)
 
-	if len(reqBody.Message.Photo) == 0 {
-		fmt.Printf("Image not found\n")
-		res.WriteHeader(http.StatusBadRequest)
-		return
-	}
 	fileID := reqBody.Message.Document.FileID
 	
 	// lastPhoto := reqBody.Message.Photo[len(reqBody.Message.Photo)-1]
@@ -180,7 +175,8 @@ func getFile(fileID, telegramToken string) ([]byte, error) {
 		fmt.Printf("could not decode file: %s\n", err)
 		return []byte{}, err
 	}
-
+	fmt.Printf("%v\n", fileResponse)
+	
 	fileRes, err := http.Get(fmt.Sprintf(fileEndpoint, telegramToken, fileResponse.Result.FilePath))
 	if err != nil {
 		fmt.Printf("file response error: %s\n", err)
