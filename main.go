@@ -24,10 +24,10 @@ type webhookReqBody struct {
 }
 
 type Message struct {
-	Photo []PhotoSize `json:"photo"`
-	Text  string      `json:"text"`
-	Document Document   `json:"document"`
-	Chat  struct {
+	Photo    []PhotoSize `json:"photo"`
+	Text     string      `json:"text"`
+	Document Document    `json:"document"`
+	Chat     struct {
 		ID int64 `json:"id"`
 	} `json:"chat"`
 }
@@ -79,7 +79,7 @@ var classesDictionary = map[string]string{
 // This handler is called everytime telegram sends us a webhook event
 func Handler(res http.ResponseWriter, req *http.Request) {
 	telegramToken := os.Getenv("TELEGRAM_BOT_TOKEN")
-	
+
 	// First, decode the JSON response body
 	reqBody := &webhookReqBody{}
 	if err := json.NewDecoder(req.Body).Decode(reqBody); err != nil {
@@ -89,15 +89,15 @@ func Handler(res http.ResponseWriter, req *http.Request) {
 	}
 	fmt.Printf("reqBody: %+v\n", reqBody)
 
-	fileID := reqBody.Message.Document.FileID
-	
+	// fileID := reqBody.Message.Document.FileID
+
 	if len(reqBody.Message.Photo) == 0 {
 		fmt.Printf("Image not found\n")
 		res.WriteHeader(http.StatusBadRequest)
 		return
 	}
 	lastPhoto := reqBody.Message.Photo[len(reqBody.Message.Photo)-1]
-	
+
 	image, err := getFile(lastPhoto.FileID, telegramToken)
 	if err != nil {
 		fmt.Printf("could not get image: %s\n", err)
@@ -182,7 +182,7 @@ func getFile(fileID, telegramToken string) ([]byte, error) {
 		return []byte{}, err
 	}
 	fmt.Printf("%v\n", fileResponse)
-	
+
 	fileRes, err := http.Get(fmt.Sprintf(fileEndpoint, telegramToken, fileResponse.Result.FilePath))
 	if err != nil {
 		fmt.Printf("file response error: %s\n", err)
