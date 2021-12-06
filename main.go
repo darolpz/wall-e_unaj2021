@@ -84,14 +84,14 @@ func Handler(res http.ResponseWriter, req *http.Request) {
 	reqBody := &webhookReqBody{}
 	if err := json.NewDecoder(req.Body).Decode(reqBody); err != nil {
 		fmt.Printf("could not decode request body: %s\n", err)
-		res.WriteHeader(http.StatusBadRequest)
+		res.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 	fmt.Printf("reqBody: %+v\n", reqBody)
 
 	if len(reqBody.Message.Photo) == 0 {
 		fmt.Printf("Image not found\n")
-		res.WriteHeader(http.StatusBadRequest)
+		res.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
