@@ -26,9 +26,14 @@ type webhookReqBody struct {
 type Message struct {
 	Photo []PhotoSize `json:"photo"`
 	Text  string      `json:"text"`
+	Document Document   `json:"document"`
 	Chat  struct {
 		ID int64 `json:"id"`
 	} `json:"chat"`
+}
+
+type Document struct {
+	FileID string `json:"file_id"`
 }
 
 type sendMessageReqBody struct {
@@ -74,15 +79,6 @@ var classesDictionary = map[string]string{
 // This handler is called everytime telegram sends us a webhook event
 func Handler(res http.ResponseWriter, req *http.Request) {
 	telegramToken := os.Getenv("TELEGRAM_BOT_TOKEN")
-
-	bodyBytes, err := ioutil.ReadAll(req.Body)
-	if err != nil {
-		fmt.Printf("could not read request: %s\n", err)
-		res.WriteHeader(http.StatusBadRequest)
-		return
-	}
-
-	fmt.Printf("reqBytes: %+v\n", string(bodyBytes))
 	
 	// First, decode the JSON response body
 	reqBody := &webhookReqBody{}
