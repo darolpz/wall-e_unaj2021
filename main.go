@@ -75,6 +75,15 @@ var classesDictionary = map[string]string{
 func Handler(res http.ResponseWriter, req *http.Request) {
 	telegramToken := os.Getenv("TELEGRAM_BOT_TOKEN")
 
+	bodyBytes, err := ioutil.ReadAll(req.Body)
+	if err != nil {
+		fmt.Printf("could not read request: %s\n", err)
+		res.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	fmt.Printf("reqBytes: %+v\n", string(bodyBytes))
+	
 	// First, decode the JSON response body
 	reqBody := &webhookReqBody{}
 	if err := json.NewDecoder(req.Body).Decode(reqBody); err != nil {
