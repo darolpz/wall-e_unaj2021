@@ -91,8 +91,14 @@ func Handler(res http.ResponseWriter, req *http.Request) {
 
 	fileID := reqBody.Message.Document.FileID
 	
-	// lastPhoto := reqBody.Message.Photo[len(reqBody.Message.Photo)-1]
-	image, err := getFile(fileID, telegramToken)
+	if len(reqBody.Message.Photo) == 0 {
+		fmt.Printf("Image not found\n")
+		res.WriteHeader(http.StatusBadRequest)
+		return
+	}
+	lastPhoto := reqBody.Message.Photo[len(reqBody.Message.Photo)-1]
+	
+	image, err := getFile(lastPhoto.FileID, telegramToken)
 	if err != nil {
 		fmt.Printf("could not get image: %s\n", err)
 		res.WriteHeader(http.StatusInternalServerError)
